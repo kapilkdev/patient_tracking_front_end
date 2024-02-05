@@ -6,7 +6,6 @@ const AddOpportunity = () => {
   const [lead, setLead] = useState('lead');
   const [selectedDoctor, setSelectedDoctor] = useState("");
   const [selectedPatient, setSelectedPatient] = useState("");
-  const [opportunities, setOpportunityData] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [patients, setPatients] = useState([]);
 
@@ -24,20 +23,41 @@ const AddOpportunity = () => {
 
   const handleSubmitOpportunity = async () => {
     const formData = {
-      leads: lead,
-      doctor: selectedDoctor,
-      patient: selectedPatient,
+      procedure_name: lead,
+      doctor_id: selectedDoctor, 
+      patient_id: selectedPatient
     };
 
-    console.log(formData);
-
-    // Add logic to send data to the server or update state
+    axios.post("http://localhost:3000/opportunities", {
+      opportunity: formData
+    }).then((res) => {
+      console.log(res.data);
+    }).catch((err)=>{
+      console.error(err,'Api Failed')
+    })
+    
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/members");
+        const allMembers = response.data.members || [];
+        const doctorsData = allMembers.filter((member) => member.role === "doctor");
+        const patientsData = allMembers.filter((member) => member.role === "patient");
+
+        setDoctors(doctorsData);
+        setPatients(patientsData);
+      } catch (error) {
+        console.error("Error fetching members:", error);
+      }
+    };
+
+    fetchData();
+  }, []); 
 
   return (
     <Form>
-
       <Form.Group controlId="lead">
         <Form.Label>Lead</Form.Label>
         <Form.Control
@@ -53,13 +73,13 @@ const AddOpportunity = () => {
         <Form.Label>Doctors</Form.Label>
         <Form.Control
           as="select"
-          value={selectedDoctor}
+          value={selectedDoctor.id}
           onChange={handleDoctorChange}
         >
           <option value="">Select a doctor</option>
           {doctors.map((doctor) => (
-            <option key={doctor.id} value={doctor.name}>
-              {doctor.name}
+            <option key={doctor.id} value={doctor.id}>
+              {doctor.first_name} {doctor.last_name}
             </option>
           ))}
         </Form.Control>
@@ -69,13 +89,13 @@ const AddOpportunity = () => {
         <Form.Label>Patients</Form.Label>
         <Form.Control
           as="select"
-          value={selectedPatient}
+          value={selectedPatient.id}
           onChange={handlePatientChange}
         >
           <option value="">Select a patient</option>
           {patients.map((patient) => (
-            <option key={patient.id} value={patient.name}>
-              {patient.name}
+            <option key={patient.id} value={patient.id}>
+              {patient.first_name} {patient.last_name}
             </option>
           ))}
         </Form.Control>

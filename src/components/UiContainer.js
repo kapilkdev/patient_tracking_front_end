@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import List from "./List";
 import { DragDropContext } from "react-beautiful-dnd";
 
-export const UiContainer = () => {
+export const UiContainer = ({searchData}) => {
   const [opportunitiesData, setOpportunityData] = useState([]);
   const [leadsData, setLeadsData] = useState([]);
   const [qualifiedData, setQualifiedData] = useState([]);
@@ -14,65 +14,57 @@ export const UiContainer = () => {
 
   const handleDragEnd = (result) => {
     const { destination, source, draggableId } = result;
-    axios.put(`http://localhost:3000/opportunities/${draggableId}/update_stage`).then((response) => {
-      setRefreshPage((previousState)=>!previousState)
-    })
-    console.log(destination, "destination");
-    console.log(source, "destination");
-    console.log(draggableId, "destination");
-
+    axios
+      .put(`http://localhost:3000/opportunities/${draggableId}/update_stage`)
+      .then((response) => {
+        setRefreshPage((previousState) => !previousState);
+      });
   };
 
-  const leadCount = opportunitiesData.reduce((count, opportunity) => {
-    if (opportunity.procedure_name === "Lead") {
-      return count + 1;
-    }
-    return count;
-  }, 0);
-  
-  console.log("Number of Leads:", leadCount);
   useEffect(() => {
     axios.get("http://localhost:3000/opportunities").then((response) => {
-      setOpportunityData(response.data?.opportunities);
-
-      setLeadsData(
-        response.data.opportunities.filter(
-          (item) => item.procedure_name === "Lead"
-        )
-      );
-      setQualifiedData(
-        response.data.opportunities.filter(
-          (item) => item.procedure_name === "Qualified"
-        )
-      );
-      setBookedData(
-        response.data.opportunities.filter(
-          (item) => item.procedure_name === "Booked"
-        )
-      );
-      setTreatedData(
-        response.data.opportunities.filter(
-          (item) => item.procedure_name === "Treated"
-        )
-      );
+      setOpportunityData(response.data?.opportunities || []);
     });
   }, [refreshPage]);
 
+  useEffect(() => {
+    if (opportunitiesData.length > 0) {
+      setLeadsData(
+        opportunitiesData.filter((item) => item.procedure_name === "Lead")
+      );
+      setQualifiedData(
+        opportunitiesData.filter((item) => item.procedure_name === "Qualified")
+      );
+      setBookedData(
+        opportunitiesData.filter((item) => item.procedure_name === "Booked")
+      );
+      setTreatedData(
+        opportunitiesData.filter((item) => item.procedure_name === "Treated")
+      );
+    }
+  }, [opportunitiesData]);
+
+  useEffect(()=>{
+    setOpportunityData(searchData)
+  },[searchData])
 
   return (
-    <div className="containers">
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="main-container">
-          <List title="Leads" data={leadsData} droppableId="leads" />
-          <List
-            title="Qualified"
-            data={qualifiedData}
-            droppableId="qualified"
-          />
-          <List title="Booked" data={bookedData} droppableId="booked" />
-          <List title="Treated" data={treatedData} droppableId="treated" />
-        </div>
-      </DragDropContext>
-    </div>
+    opportunitiesData.length > 0 && (
+      <div className="containers">
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <div className="main-container">
+              <List
+                title="Leads"
+                data={leadsData}
+                data_length =  {leadsData.length}
+                droppableId="leads"
+              />
+              <List title="Qualified" data={qualifiedData} data_length =  {qualifiedData.length} droppableId="qualified" />
+              <List title="Booked" data={bookedData} data_length =  {bookedData.length}droppableId="booked" />
+              <List title="Treated" data={treatedData} data_length =  {treatedData.length}droppableId="treated" />
+          </div>
+        </DragDropContext>
+      </div>
+    )
   );
 };

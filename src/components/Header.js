@@ -1,14 +1,15 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { PersonPlus } from "react-bootstrap-icons";
 import "bootstrap/dist/css/bootstrap.min.css";
+import SearchComponent from './SearchComponent';
 import "../App.css";
 import AddMemberForm from "./AddMember";
 import AddOpportunity from "./AddOpportunity";
 
 import axios from "axios";
 
-export const Header = () => {
+export const Header = ({onSearch,onCloseOpportunityModal,handleRefreshPage}) => {
   const [showModal, setShowModal] = useState(false);
   const [showOpportunityModal, setShowOpportunityModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -21,7 +22,6 @@ export const Header = () => {
   });
   const [membersList, setMembersList] = useState([]);
   const [errors, setErrors] = useState({});
-
   const handleShow = () => setShowModal(true);
   const handleOpportunity = () => setShowOpportunityModal(true);
 
@@ -46,7 +46,6 @@ export const Header = () => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      console.log("Selected file:", file);
       setFormData({
         ...formData,
         avatar: URL.createObjectURL(file),
@@ -92,12 +91,9 @@ export const Header = () => {
   const handleAddMember = async () => {
     if (isFormValid()) {
       try {
-        console.log("Adding member:", formData);
-        const response = await axios.post("http://192.168.29.91:3000/members", {
+        const response = await axios.post("http://localhost:3000/members", {
           member: formData,
         });
-        console.log("API Response:", response.data);
-
         setMembersList([...membersList, response.data]);
         handleClose();
       } catch (error) {
@@ -106,21 +102,41 @@ export const Header = () => {
     }
   };
 
+  const handleSearch = async (name) =>{
+      try {
+        const response = await axios.get(`http://127.0.0.1:3000/opportunities/search_by_name_and_procedure?search=${name}`);
+        
+        handleRefreshPage(response.data)
+
+      } catch (error) {
+        console.error("Error during search:", error);
+      }
+  }
+
   const handleCloseOpp = () => {
     setShowOpportunityModal(false);
+    if (onCloseOpportunityModal) {
+      onCloseOpportunityModal();
+    }
   };
+
   return (
     <div className="app-container">
       <div className="header-container">
         <h4 className="patient-heading">Patient</h4>
         <div className="button-container">
-          <Button variant="dark" className="search-button">
-            Search
-          </Button>
+        <SearchComponent onSearch={handleSearch} onCloseOpportunityModal={handleCloseOpp}/>
           <Button
             variant="primary"
             onClick={handleShow}
             className="add-member-button"
+            style={{
+              color: "#ffffff",
+              padding: "5px",
+              width:"200px",
+              height:"40px",
+              borderRadius: "300px",
+            }}
           >
             <PersonPlus /> Add Member
           </Button>
@@ -128,6 +144,13 @@ export const Header = () => {
             variant="primary"
             onClick={handleOpportunity}
             className="add-member-button"
+            style={{
+              color: "#ffffff",
+              padding: "5px",
+              width:"200px",
+              height:"40px",
+              borderRadius: "300px",
+            }}
           >
             <PersonPlus /> Add Opportunity
           </Button>
