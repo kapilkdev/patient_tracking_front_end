@@ -11,21 +11,23 @@ export const UiContainer = ({searchData}) => {
   const [bookedData, setBookedData] = useState([]);
   const [treatedData, setTreatedData] = useState([]);
   const [refreshPage, setRefreshPage] = useState(false);
-
+  const apiUrl = "https://patient-tracking-backend.onrender.com"
   const handleDragEnd = (result) => {
+    debugger
+    console.log(process.env.REACT_APP_API_URL)
     const { destination, source, draggableId } = result;
     axios
-      .put(`http://localhost:3000/opportunities/${draggableId}/update_stage`)
+      .put(`${apiUrl}/opportunities/${draggableId}/update_stage`)
       .then((response) => {
         setRefreshPage((previousState) => !previousState);
       });
   };
 
   useEffect(() => {
-    axios.get("http://localhost:3000/opportunities").then((response) => {
+    axios.get(`${apiUrl}/opportunities`).then((response) => {
       setOpportunityData(response.data?.opportunities || []);
     });
-  }, [refreshPage]);
+  }, [apiUrl,refreshPage]);
 
   useEffect(() => {
     if (opportunitiesData.length > 0) {

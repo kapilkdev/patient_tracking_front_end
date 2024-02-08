@@ -5,7 +5,6 @@ import {Header} from "./components/Header";
 import  {UiContainer} from "./components/UiContainer";
 const App = () => {
   const [searchData, setSearchData] = useState([]);
-
   const handleRefreshPage = (data) => {
     setSearchData(data.opportunities)
   };

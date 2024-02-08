@@ -6,7 +6,6 @@ import SearchComponent from './SearchComponent';
 import "../App.css";
 import AddMemberForm from "./AddMember";
 import AddOpportunity from "./AddOpportunity";
-
 import axios from "axios";
 
 export const Header = ({onSearch,onCloseOpportunityModal,handleRefreshPage}) => {
@@ -20,6 +19,8 @@ export const Header = ({onSearch,onCloseOpportunityModal,handleRefreshPage}) => 
     gender: "",
     dob: "",
   });
+  const apiUrl = "https://patient-tracking-backend.onrender.com"
+  
   const [membersList, setMembersList] = useState([]);
   const [errors, setErrors] = useState({});
   const handleShow = () => setShowModal(true);
@@ -91,7 +92,7 @@ export const Header = ({onSearch,onCloseOpportunityModal,handleRefreshPage}) => 
   const handleAddMember = async () => {
     if (isFormValid()) {
       try {
-        const response = await axios.post("http://localhost:3000/members", {
+        const response = await axios.post(`${apiUrl}/members`, {
           member: formData,
         });
         setMembersList([...membersList, response.data]);
@@ -104,7 +105,7 @@ export const Header = ({onSearch,onCloseOpportunityModal,handleRefreshPage}) => 
 
   const handleSearch = async (name) =>{
       try {
-        const response = await axios.get(`http://127.0.0.1:3000/opportunities/search_by_name_and_procedure?search=${name}`);
+        const response = await axios.get(`${apiUrl}/opportunities/search_by_name_and_procedure?search=${name}`);
         
         handleRefreshPage(response.data)
 

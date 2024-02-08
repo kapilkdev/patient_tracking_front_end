@@ -9,6 +9,8 @@ const AddOpportunity = () => {
   const [doctors, setDoctors] = useState([]);
   const [patients, setPatients] = useState([]);
 
+  const apiUrl = "https://patient-tracking-backend.onrender.com"
+
   const handleDoctorChange = (event) => {
     setSelectedDoctor(event.target.value);
   };
@@ -28,7 +30,7 @@ const AddOpportunity = () => {
       patient_id: selectedPatient
     };
 
-    axios.post("http://localhost:3000/opportunities", {
+    axios.post(`${apiUrl}/opportunities`, {
       opportunity: formData
     }).then((res) => {
       console.log(res.data);
@@ -41,7 +43,7 @@ const AddOpportunity = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/members");
+        const response = await axios.get(`${apiUrl}/members`);
         const allMembers = response.data.members || [];
         const doctorsData = allMembers.filter((member) => member.role === "doctor");
         const patientsData = allMembers.filter((member) => member.role === "patient");
